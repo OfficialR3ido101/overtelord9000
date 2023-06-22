@@ -13,12 +13,14 @@
 
 int main(int argc, char **argv) {
 
-    if(getenv("DISCORD_TOKEN") == nullptr || getenv("WEBSOCKET_PORT") == nullptr) {
+    if(getenv("DISCORD_TOKEN") == nullptr || getenv("WELCOME_CHANNEL") == nullptr || getenv("WEBSOCKET_PORT") == nullptr) {
         std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN and WEBSOCKET_PORT";
         return 1;
     }
 
-    dpp::cluster bot(getenv("DISCORD_TOKEN"));
+    uint64_t channelid = std::stoull(getenv("WELCOME_CHANNEL"));
+
+    dpp::cluster bot(getenv("DISCORD_TOKEN"), dpp::i_default_intents | dpp::i_guild_members);
 
     const std::string log_name = "overtelord9000.log";
 
@@ -57,6 +59,35 @@ int main(int argc, char **argv) {
                 log->critical("{}", event.message);
             break;
         }
+    });
+
+
+    bot.on_guild_member_add([&bot, channelid](const dpp::guild_member_add_t & event){
+        dpp::embed embed = dpp::embed()
+        .set_color(dpp::colors::green)
+        .set_title("New User!")
+        .add_field(
+            "User Joined",
+            event.added.get_user()->username
+        )
+        .set_image(event.added.get_avatar_url())
+        .set_timestamp(time(0));
+
+        bot.message_create(dpp::message(channelid, embed));
+    });
+
+    bot.on_guild_member_remove([&bot, channelid](const dpp::guild_member_remove_t & event){
+        dpp::embed embed = dpp::embed()
+        .set_color(dpp::colors::scarlet_red)
+        .set_title("User Left!")
+        .add_field(
+            "User Left",
+            event.removed->username
+        )
+        .set_image(event.removed->get_avatar_url())
+        .set_timestamp(time(0));
+
+        bot.message_create(dpp::message(channelid, embed));
     });
 
     bot.on_ready([&bot](const dpp::ready_t & event) {
