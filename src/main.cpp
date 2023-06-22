@@ -90,8 +90,8 @@ int main(int argc, char **argv) {
         bot.message_create(dpp::message(channelid, embed));
     });
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
-        std::cout << "We are online!" << bot.me.username;
+    bot.on_ready([&bot, &log](const dpp::ready_t & event) {
+        log->info("We are online as: " + bot.me.username);
 
         bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
