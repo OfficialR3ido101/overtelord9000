@@ -11,6 +11,12 @@
 #include <dpp/dpp.h>
 #include <fmt/format.h>
 
+BotWsServer websocketServer;
+
+void socketServer() {
+    websocketServer.run();
+}
+
 int main(int argc, char **argv) {
 
     if(getenv("DISCORD_TOKEN") == nullptr || getenv("WELCOME_CHANNEL") == nullptr || getenv("WEBSOCKET_PORT") == nullptr) {
@@ -41,23 +47,23 @@ int main(int argc, char **argv) {
         switch (event.severity) {
             case dpp::ll_trace:
                 log->trace("{}", event.message);
-            break;
+                break;
             case dpp::ll_debug:
                 log->debug("{}", event.message);
-            break;
+                break;
             case dpp::ll_info:
                 log->info("{}", event.message);
-            break;
+                break;
             case dpp::ll_warning:
                 log->warn("{}", event.message);
-            break;
+                break;
             case dpp::ll_error:
                 log->error("{}", event.message);
-            break;
+                break;
             case dpp::ll_critical:
             default:
                 log->critical("{}", event.message);
-            break;
+                break;
         }
     });
 
@@ -95,9 +101,28 @@ int main(int argc, char **argv) {
 
         bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
-        dpp::slashcommand owo("owo", "Sup", bot.me.id);
-        bot.global_command_create(owo);
+        bot.on_ready([&bot, &log](const dpp::ready_t & event) {
+            bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
+            dpp::slashcommand sendOverte("overtemessage","", bot.me.id);
+
+            sendOverte.add_option(
+                dpp::command_option(dpp::co_string, "message", "message to be sent", true)
+            );
+
+            bot.global_command_create(sendOverte);
+
+            log->info("Commands are registered!");
+        });
+
+    });
+
+    bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+        if(event.command.get_command_name() == "overtemessage") {
+            std::string message = std::get<std::string>(event.get_parameter("message"));
+            websocketServer.sendClientMessage(message);
+            event.reply(std::string("sent message: " + message));
+        }
     });
 
     bot.on_interaction_create([&bot](const dpp::interaction_create_t & event){
@@ -106,8 +131,11 @@ int main(int argc, char **argv) {
         }
     });
 
+
+
+    std::thread websocket (socketServer);
+
     bot.start(dpp::st_wait);
-    StartSocket();
 
     return 0;
 }
