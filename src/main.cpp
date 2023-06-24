@@ -101,25 +101,22 @@ int main(int argc, char **argv) {
 
         bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
-        bot.on_ready([&bot, &log](const dpp::ready_t & event) {
-            bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
+        dpp::slashcommand sendOverte("overtemessage","send message to webhook.", bot.me.id);
 
-            dpp::slashcommand sendOverte("overtemessage","", bot.me.id);
+        sendOverte.add_option(
+            dpp::command_option(dpp::co_string, "message", "message to be sent", true)
+        );
 
-            sendOverte.add_option(
-                dpp::command_option(dpp::co_string, "message", "message to be sent", true)
-            );
+        bot.global_command_create(sendOverte);
 
-            bot.global_command_create(sendOverte);
-
-            log->info("Commands are registered!");
-        });
+        log->info("Commands are registered!");
 
     });
 
     bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
         if(event.command.get_command_name() == "overtemessage") {
             std::string message = std::get<std::string>(event.get_parameter("message"));
+
             websocketServer.sendClientMessage(message);
             event.reply(std::string("sent message: " + message));
         }
@@ -130,8 +127,6 @@ int main(int argc, char **argv) {
             event.reply("OwO!");
         }
     });
-
-
 
     std::thread websocket (socketServer);
 
