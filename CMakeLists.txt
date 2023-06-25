@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(overtelord9000)
 
-add_executable(overtelord9000 src/main.cpp src/websocket/websocketserver.cpp)
+add_executable(overtelord9000 src/main.cpp src/websocket/websocketserver.cpp src/discord/bot.cpp src/matrix/bot.cpp)
 
 install(TARGETS overtelord9000 RUNTIME DESTINATION bin)
 include_directories("/opt/vcpkg/installed/x64-linux/include/")
