@@ -1,4 +1,4 @@
-#pragma once
+
 
 #include <set>
 
@@ -26,30 +26,14 @@ public:
         m_endpoint.set_close_handler(bind(&BotWsServer::on_close,this,::_1));
     }
 
-    void on_open(websocketpp::connection_hdl hdl) {
-        m_connections.insert(hdl);
-    }
+    void on_open(websocketpp::connection_hdl hdl);
 
-    void on_close(websocketpp::connection_hdl hdl) {
-        m_connections.erase(hdl);
-    }
+    void on_close(websocketpp::connection_hdl hdl);
 
-    void run() {
-        // Listen on port 9002
-        m_endpoint.listen(std::stoi(getenv("WEBSOCKET_PORT")));
+    void run();
 
-        // Queues a connection accept operation
-        m_endpoint.start_accept();
+    void sendClientMessage(std::string message);
 
-        // Start the Asio io_service run loop
-        m_endpoint.run();
-    }
-
-
-
-    void sendClientMessage(std::string message) {
-        sendMessage(message);
-    }
 private:
     server m_endpoint;
     typedef std::set<websocketpp::connection_hdl,std::owner_less<websocketpp::connection_hdl>> con_list;
