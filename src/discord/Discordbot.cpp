@@ -3,15 +3,14 @@
 #include <dpp/channel.h>
 #include <cstdlib>
 #include "../websocket/websocketserver.h"
-#include <spdlog/spdlog.h>
-#include <spdlog/async.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
 #include <iomanip>
 #include <dpp/dpp.h>
 #include <fmt/format.h>
+#include <qt5/QtCore/QCoreApplication>
+#include <qlogging.h>
+#include <QDebug>
 
-void startDiscord(std::shared_ptr<spdlog::logger> log) {
+void startDiscord() {
 
     uint64_t channelid = std::stoull(getenv("WELCOME_CHANNEL"));
 
@@ -23,26 +22,26 @@ void startDiscord(std::shared_ptr<spdlog::logger> log) {
 
     /* Set up spdlog logger */
 
-    bot.on_log([&bot, &log](const dpp::log_t & event) {
+    bot.on_log([&bot](const dpp::log_t & event) {
         switch (event.severity) {
             case dpp::ll_trace:
-                log->trace("{}", event.message);
+                qDebug() << event.message.c_str();
                 break;
             case dpp::ll_debug:
-                log->debug("{}", event.message);
+                qDebug() << event.message.c_str();
                 break;
             case dpp::ll_info:
-                log->info("{}", event.message);
+                qInfo() << event.message.c_str();
                 break;
             case dpp::ll_warning:
-                log->warn("{}", event.message);
+                qWarning() << event.message.c_str();
                 break;
             case dpp::ll_error:
-                log->error("{}", event.message);
+                qCritical() << event.message.c_str();
                 break;
             case dpp::ll_critical:
             default:
-                log->critical("{}", event.message);
+                qCritical() << event.message.c_str();
                 break;
         }
     });
@@ -75,8 +74,8 @@ void startDiscord(std::shared_ptr<spdlog::logger> log) {
         bot.message_create(dpp::message(channelid, embed));
     });
 
-    bot.on_ready([&bot, &log](const dpp::ready_t & event) {
-        log->info("We are online as: " + bot.me.username);
+    bot.on_ready([&bot](const dpp::ready_t & event) {
+        qDebug() << "We are online as: " << bot.me.username.c_str();
 
         bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
@@ -88,7 +87,7 @@ void startDiscord(std::shared_ptr<spdlog::logger> log) {
 
         bot.global_command_create(sendOverte);
 
-        log->info("Commands are registered!");
+        qDebug() << "Commands are registered!";
 
     });
 

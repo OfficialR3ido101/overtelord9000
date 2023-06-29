@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(overtelord9000)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
@@ -19,7 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fconcepts" )
 add_executable(overtelord9000
 src/main.cpp
 src/websocket/websocketserver.cpp
-src/discord/Discordbot.cpp src/matrix/Matrixbot.cpp
+src/discord/Discordbot.cpp
 )
 
 install(TARGETS overtelord9000 RUNTIME DESTINATION bin)
@@ -31,10 +31,10 @@ find_package(Opus CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(unofficial-sodium CONFIG REQUIRED)
 find_package(websocketpp CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
+#find_package(spdlog CONFIG REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Quotient CONFIG REQUIRED)
-target_link_libraries(overtelord9000 PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+#target_link_libraries(overtelord9000 PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 target_link_libraries(overtelord9000 PRIVATE websocketpp::websocketpp)
 target_link_libraries(overtelord9000 PRIVATE unofficial-sodium::sodium unofficial-sodium::sodium_config_public)
 target_link_libraries(overtelord9000 PRIVATE ZLIB::ZLIB)

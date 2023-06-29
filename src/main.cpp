@@ -4,18 +4,19 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <spdlog/spdlog.h>
-#include <spdlog/async.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
+#include <Quotient/connection.h>
+#include <Quotient/room.h>
+#include <Quotient/qt_connection_util.h>
+#include <qt5/QtCore/QCoreApplication>
+#include <qt5/QtCore/QMetaObject>
 
 void socketServer() {
     BotWsServer ws;
     ws.run();
 }
 
-void startDiscordBot(std::shared_ptr<spdlog::logger> log) {
-    startDiscord(log);
+void startDiscordBot() {
+    startDiscord();
 }
 
 //void startMatrixBot(int argc, char* argv[]) {
@@ -25,39 +26,72 @@ void startDiscordBot(std::shared_ptr<spdlog::logger> log) {
 
 int main(int argc, char* argv[]) {
 
-    std::shared_ptr<spdlog::logger> log;
-    const std::string log_name = "overtelord9000.log";
-    spdlog::init_thread_pool(8192, 2);
-    std::vector<spdlog::sink_ptr> sinks;
-    auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt >();
-    auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_name, 1024 * 1024 * 5, 10);
-    sinks.push_back(stdout_sink);
-    sinks.push_back(rotating);
-    log = std::make_shared<spdlog::async_logger>("logs", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
-    spdlog::register_logger(log);
-    log->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%L] [th#%t]%$ : %v");
-    log->set_level(spdlog::level::level_enum::debug);
-
-
     if(getenv("DISCORD_TOKEN") == nullptr
         || getenv("WELCOME_CHANNEL") == nullptr
         || getenv("WEBSOCKET_PORT") == nullptr
         || getenv("MATRIX_USERNAME") == nullptr
-        || getenv("MATRIX_PASSWORD") == nullptr)
+        || getenv("MATRIX_PASSWORD") == nullptr
+        || getenv("MATRIX_PREFIX") == nullptr)
     {
-        std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN, WELCOME_CHANNEL, MATRIX_USERNAME, MATRIX_PASSWORD and WEBSOCKET_PORT" << "\n";
+        std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN, WELCOME_CHANNEL, MATRIX_USERNAME, MATRIX_PASSWORD, MATRIX_PREFIX and WEBSOCKET_PORT" << "\n" << "\n";
         return 1;
     }
 
+    QCoreApplication app(argc, argv);
+    const auto* userMxid = "@animatedmanaquinn:overte.org";
+    const auto* password = "Tc4XegwNcu4DU0ZL2zOG";
+    const auto* deviceName = "AI";
+
+    using Quotient::Connection;
+
+    // You can create as many connections (to as many servers) as you need.
+    // When logging in via mxid and password the connection gets a new access token.
+    // Connection::connectWithToken() allows to connect using an existing access token.
+    auto* c = new Connection(&app);
+    c->loginWithPassword(userMxid, password, deviceName); // The homeserver is resolved from the user name
+    app.connect(c, &Connection::connected, c, [c] {
+        qDebug() << "Connected, server: " << c->homeserver().toDisplayString();
+
+        c->syncLoop();
+    });
+    app.connect(c, &Connection::resolveError, c, [&](const QString& error) {
+
+        qDebug() << "Failed to resolve the server: " << error;
+        app.exit(-2);
+    });
+    // connectSingleShot() is Qt's connect() that triggers exactly once and then disconnects
+    Quotient::connectSingleShot(c, &Connection::syncDone, c, [c] {
+        const auto& allRooms = c->allRooms();
+        qDebug() << "Sync done;" << allRooms.count() << "room(s) and"
+                << c->users().count() << "user(s) received";
+                std::string users = std::to_string(c->users().count());
+
+        std::cout << "sync";
+
+        // Schedule logout after all rooms already queued for updating are done
+        QMetaObject::invokeMethod(c, [c] {
+            qDebug() << "That's all, thank you";
+
+            //c->logout();
+        }, Qt::QueuedConnection);
+    });
+    QObject::connect(c, &Connection::loadedRoomState, c, [c](Quotient::Room* room) {
+        qDebug() << "\nRoom display name:" << room->displayName()
+                << "\nRoom topic:" << room->topic()
+                << "\nJoined members:" << room->joinedCount() << "\n";
+    });
+
+
+    //QObject::connect(c, &Connection::loggedOut, &app, &QCoreApplication::quit);
+
+        QObject::connect(c, &Connection::loggedOut, c, [&]() {
+        app.exit(-2);
+    });
+
     std::thread websocket (socketServer);
-    std::thread discord (startDiscordBot, log);
+    std::thread discord (startDiscordBot);
 
-    startMatrix(argc, argv, log);
+    qInfo() << "Press Ctrl+C To exit.";
 
-    do
-    {
-        std::cout << '\n' << "Press ENTER/RETURN to exit..." << "\n" << "\n";
-    } while (std::cin.get() != '\n');
-
-    return 0;
+    return app.exec();
 }
