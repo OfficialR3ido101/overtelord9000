@@ -10,9 +10,8 @@
 #include <qt5/QtCore/QCoreApplication>
 #include <qt5/QtCore/QMetaObject>
 
-void socketServer() {
-    BotWsServer ws;
-    ws.run();
+void socketServer(BotWsServer *ws) {
+    ws->run();
 }
 
 void startDiscordBot() {
@@ -20,6 +19,8 @@ void startDiscordBot() {
 }
 
 int main(int argc, char* argv[]) {
+
+    BotWsServer ws;
 
     if(getenv("DISCORD_TOKEN") == nullptr
         || getenv("WELCOME_CHANNEL") == nullptr
@@ -31,10 +32,10 @@ int main(int argc, char* argv[]) {
         std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN, WELCOME_CHANNEL, MATRIX_USERNAME, MATRIX_PASSWORD, MATRIX_PREFIX and WEBSOCKET_PORT" << "\n" << "\n";
         return 1;
     }
-    std::thread websocket (socketServer);
+    std::thread websocket (socketServer, &ws);
     std::thread discord (startDiscordBot);
 
-    startMatrix(argc, argv);
+    qInfo() << "[Main] " << "Press Ctrl+C To exit.";
 
-    qInfo() << "Press Ctrl+C To exit.";
+    startMatrix(argc, argv, ws);
 }

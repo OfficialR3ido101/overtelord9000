@@ -1,4 +1,6 @@
 #pragma once
 
-void startMatrix(int argc, char* argv[]);
+#include "../websocket/websocketserver.h"
+
+void startMatrix(int argc, char* argv[], BotWsServer& ws);
 

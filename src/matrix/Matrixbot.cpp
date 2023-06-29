@@ -6,8 +6,9 @@
 #include <iostream>
 #include <string>
 #include <qt5/QtCore/QMetaObject>
+#include "../websocket/websocketserver.h"
 
-int startMatrix(int argc, char* argv[]) {
+int startMatrix(int argc, char* argv[], BotWsServer& ws) {
 
     QCoreApplication app(argc, argv);
     const auto* userMxid = getenv("MATRIX_USERNAME");
@@ -51,8 +52,10 @@ int startMatrix(int argc, char* argv[]) {
     //QObject::connect(c, &Connection::loggedOut, &app, &QCoreApplication::quit);
 
     QObject::connect(c, &Connection::loggedOut, c, [&]() {
-        app.exit(-2);
+        qDebug() << "[Matrix] " << "We have been loggedOut.";
     });
+
+    QObject::connect(&ws, &BotWsServer::finished, &app, &QCoreApplication::quit);
 
     return app.exec();
 }

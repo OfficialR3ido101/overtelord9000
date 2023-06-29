@@ -25,4 +25,6 @@
 
     void BotWsServer::on_close(websocketpp::connection_hdl hdl) {
         m_connections.erase(hdl);
+        qInfo() << "[Websocket] " << "Closed Websocket server!";
+        emit finished();
     }

@@ -10,11 +10,14 @@
 
 #include <qlogging.h>
 #include <QDebug>
+#include <QtCore>
 
 typedef websocketpp::server<websocketpp::config::asio> server;
 using websocketpp::lib::placeholders::_1;
 
-class BotWsServer {
+class BotWsServer : public QObject {
+    Q_OBJECT
+
 public:
     BotWsServer() {
         // Set logging settings
@@ -36,6 +39,10 @@ public:
     void run();
 
     void sendClientMessage(std::string message);
+
+
+signals:
+    void finished();
 
 private:
     server m_endpoint;
@@ -63,4 +70,4 @@ private:
         }
 
     }
-};
+    };
