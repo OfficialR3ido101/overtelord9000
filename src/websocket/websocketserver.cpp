@@ -1,11 +1,15 @@
 #include "websocketserver.h"
+#include <qlogging.h>
+#include <QDebug>
 
     void BotWsServer::run() {
-        // Listen on port 9002
+
         m_endpoint.listen(std::stoi(getenv("WEBSOCKET_PORT")));
 
         // Queues a connection accept operation
         m_endpoint.start_accept();
+
+        qDebug() << "[Websocket]" << "Websocket server starting!";
 
         // Start the Asio io_service run loop
         m_endpoint.run();

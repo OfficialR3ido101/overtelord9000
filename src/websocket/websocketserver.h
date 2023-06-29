@@ -8,6 +8,9 @@
 #include <functional>
 #include <websocketpp/common/connection_hdl.hpp>
 
+#include <qlogging.h>
+#include <QDebug>
+
 typedef websocketpp::server<websocketpp::config::asio> server;
 using websocketpp::lib::placeholders::_1;
 
@@ -43,9 +46,9 @@ private:
 
     void sendMessage(std::string msg) {
 
-        std::cout << "on_message called with hdl: "
-        << " and message: " << msg
-        << std::endl;
+        qDebug() << "on_message called with hdl: "
+        << " and message: " << msg.c_str()
+        << "\n";
 
         for(auto connection : m_connections) {
             try {
@@ -53,8 +56,8 @@ private:
                 m_endpoint.send(connection, msg, websocketpp::frame::opcode::text);
             } catch (websocketpp::exception const & e) {
 
-                std::cout << "Echo failed because: "
-                << "(" << e.what() << ")" << std::endl;
+                qCritical() << "[Websocket]" << "Echo failed because: "
+                << "(" << e.what() << ")" << "\n";
 
             }
         }

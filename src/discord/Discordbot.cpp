@@ -20,28 +20,26 @@ void startDiscord() {
 
     BotWsServer ws;
 
-    /* Set up spdlog logger */
-
     bot.on_log([&bot](const dpp::log_t & event) {
         switch (event.severity) {
             case dpp::ll_trace:
-                qDebug() << event.message.c_str();
+                qDebug() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_debug:
-                qDebug() << event.message.c_str();
+                qDebug() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_info:
-                qInfo() << event.message.c_str();
+                qInfo() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_warning:
-                qWarning() << event.message.c_str();
+                qWarning() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_error:
-                qCritical() << event.message.c_str();
+                qCritical() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_critical:
             default:
-                qCritical() << event.message.c_str();
+                qCritical() << "[Discord] " << event.message.c_str();
                 break;
         }
     });
