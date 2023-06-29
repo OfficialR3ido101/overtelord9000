@@ -7,7 +7,6 @@
 #include <dpp/dpp.h>
 #include <fmt/format.h>
 #include <qt5/QtCore/QCoreApplication>
-#include <qlogging.h>
 #include <QDebug>
 
 void startDiscord() {

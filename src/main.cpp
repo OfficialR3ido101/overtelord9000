@@ -38,4 +38,6 @@ int main(int argc, char* argv[]) {
     qInfo() << "[Main] " << "Press Ctrl+C To exit.";
 
     startMatrix(argc, argv, ws);
+
+    return 0;
 }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(overtelord9000)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
@@ -24,7 +24,6 @@ src/discord/Discordbot.cpp src/matrix/Matrixbot.cpp
 
 install(TARGETS overtelord9000 RUNTIME DESTINATION bin)
 include_directories("/opt/vcpkg/installed/x64-linux/include/")
-set_property(TARGET overtelord9000 PROPERTY CXX_STANDARD 20)
 find_package(dpp CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Opus CONFIG REQUIRED)

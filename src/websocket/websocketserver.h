@@ -8,7 +8,6 @@
 #include <functional>
 #include <websocketpp/common/connection_hdl.hpp>
 
-#include <qlogging.h>
 #include <QDebug>
 #include <QtCore>
 

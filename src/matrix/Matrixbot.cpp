@@ -11,13 +11,14 @@
 int startMatrix(int argc, char* argv[], BotWsServer& ws) {
 
     QCoreApplication app(argc, argv);
-    const auto* userMxid = getenv("MATRIX_USERNAME");
-    const auto* password = getenv("MATRIX_PASSWORD");
-    const auto* deviceName = "AI";
+    const QString userMxid = getenv("MATRIX_USERNAME");
+    const QString password = getenv("MATRIX_PASSWORD");
+    const QString deviceName = "AI";
 
     using Quotient::Connection;
 
     auto* c = new Connection(&app);
+
     c->loginWithPassword(userMxid, password, deviceName);
     app.connect(c, &Connection::connected, c, [c] {
         qDebug() << "Connected, server: " << c->homeserver().toDisplayString();
@@ -48,7 +49,6 @@ int startMatrix(int argc, char* argv[], BotWsServer& ws) {
         << "\nJoined members:" << room->joinedCount() << "\n";
     });
 
-
     //QObject::connect(c, &Connection::loggedOut, &app, &QCoreApplication::quit);
 
     QObject::connect(c, &Connection::loggedOut, c, [&]() {
@@ -56,6 +56,7 @@ int startMatrix(int argc, char* argv[], BotWsServer& ws) {
     });
 
     QObject::connect(&ws, &BotWsServer::finished, &app, &QCoreApplication::quit);
-
-    return app.exec();
+    int appReturnVal = app.exec();
+    delete c;
+    return appReturnVal;
 }
