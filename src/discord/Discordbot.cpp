@@ -3,20 +3,13 @@
 #include <dpp/channel.h>
 #include <cstdlib>
 #include "../websocket/websocketserver.h"
-#include <spdlog/spdlog.h>
-#include <spdlog/async.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
 #include <iomanip>
 #include <dpp/dpp.h>
 #include <fmt/format.h>
+#include <qt5/QtCore/QCoreApplication>
+#include <QDebug>
 
 void startDiscord() {
-
-    if(getenv("DISCORD_TOKEN") == nullptr || getenv("WELCOME_CHANNEL") == nullptr || getenv("WEBSOCKET_PORT") == nullptr) {
-        std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN, WELCOME_CHANNEL and WEBSOCKET_PORT";
-        return;
-    }
 
     uint64_t channelid = std::stoull(getenv("WELCOME_CHANNEL"));
 
@@ -24,41 +17,28 @@ void startDiscord() {
 
     const std::string log_name = "overtelord9000.log";
 
-    BotWsServer websocketServer;
+    BotWsServer ws;
 
-    /* Set up spdlog logger */
-    std::shared_ptr<spdlog::logger> log;
-    spdlog::init_thread_pool(8192, 2);
-    std::vector<spdlog::sink_ptr> sinks;
-    auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt >();
-    auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_name, 1024 * 1024 * 5, 10);
-    sinks.push_back(stdout_sink);
-    sinks.push_back(rotating);
-    log = std::make_shared<spdlog::async_logger>("logs", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
-    spdlog::register_logger(log);
-    log->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%L] [th#%t]%$ : %v");
-    log->set_level(spdlog::level::level_enum::debug);
-
-    bot.on_log([&bot, &log](const dpp::log_t & event) {
+    bot.on_log([&bot](const dpp::log_t & event) {
         switch (event.severity) {
             case dpp::ll_trace:
-                log->trace("{}", event.message);
+                qDebug() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_debug:
-                log->debug("{}", event.message);
+                qDebug() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_info:
-                log->info("{}", event.message);
+                qInfo() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_warning:
-                log->warn("{}", event.message);
+                qWarning() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_error:
-                log->error("{}", event.message);
+                qCritical() << "[Discord] " << event.message.c_str();
                 break;
             case dpp::ll_critical:
             default:
-                log->critical("{}", event.message);
+                qCritical() << "[Discord] " << event.message.c_str();
                 break;
         }
     });
@@ -91,8 +71,8 @@ void startDiscord() {
         bot.message_create(dpp::message(channelid, embed));
     });
 
-    bot.on_ready([&bot, &log](const dpp::ready_t & event) {
-        log->info("We are online as: " + bot.me.username);
+    bot.on_ready([&bot](const dpp::ready_t & event) {
+        qDebug() << "We are online as: " << bot.me.username.c_str();
 
         bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
@@ -104,15 +84,15 @@ void startDiscord() {
 
         bot.global_command_create(sendOverte);
 
-        log->info("Commands are registered!");
+        qDebug() << "Commands are registered!";
 
     });
 
-    bot.on_slashcommand([&bot, &websocketServer](const dpp::slashcommand_t & event) {
+    bot.on_slashcommand([&bot, &ws](const dpp::slashcommand_t & event) {
         if(event.command.get_command_name() == "overtemessage") {
             std::string message = std::get<std::string>(event.get_parameter("message"));
 
-            websocketServer.sendClientMessage(message);
+            ws.sendClientMessage(message);
             event.reply(std::string("sent message: " + message));
         }
     });

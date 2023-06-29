@@ -1,26 +1,43 @@
-#include "discord/bot.h"
+#include "discord/Discordbot.h"
+#include "matrix/Matrixbot.h"
 #include "websocket/websocketserver.h"
+#include <iostream>
+#include <string>
+#include <thread>
+#include <Quotient/connection.h>
+#include <Quotient/room.h>
+#include <Quotient/qt_connection_util.h>
+#include <qt5/QtCore/QCoreApplication>
+#include <qt5/QtCore/QMetaObject>
 
-BotWsServer websocketServer;
-
-void socketServer() {
-    websocketServer.run();
+void socketServer(BotWsServer *ws) {
+    ws->run();
 }
 
 void startDiscordBot() {
     startDiscord();
 }
 
-
 int main(int argc, char* argv[]) {
 
-    std::thread websocket (socketServer);
+    BotWsServer ws;
+
+    if(getenv("DISCORD_TOKEN") == nullptr
+        || getenv("WELCOME_CHANNEL") == nullptr
+        || getenv("WEBSOCKET_PORT") == nullptr
+        || getenv("MATRIX_USERNAME") == nullptr
+        || getenv("MATRIX_PASSWORD") == nullptr
+        || getenv("MATRIX_PREFIX") == nullptr)
+    {
+        std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN, WELCOME_CHANNEL, MATRIX_USERNAME, MATRIX_PASSWORD, MATRIX_PREFIX and WEBSOCKET_PORT" << "\n" << "\n";
+        return 1;
+    }
+    std::thread websocket (socketServer, &ws);
     std::thread discord (startDiscordBot);
 
-    do
-    {
-        std::cout << '\n' << "Press a key to exit..." << "\n" << "\n";
-    } while (std::cin.get() != '\n');
+    qInfo() << "[Main] " << "Press Ctrl+C To exit.";
+
+    startMatrix(argc, argv, ws);
 
     return 0;
 }

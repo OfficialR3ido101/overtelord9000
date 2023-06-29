@@ -8,10 +8,15 @@
 #include <functional>
 #include <websocketpp/common/connection_hdl.hpp>
 
+#include <QDebug>
+#include <QtCore>
+
 typedef websocketpp::server<websocketpp::config::asio> server;
 using websocketpp::lib::placeholders::_1;
 
-class BotWsServer {
+class BotWsServer : public QObject {
+    Q_OBJECT
+
 public:
     BotWsServer() {
         // Set logging settings
@@ -26,30 +31,18 @@ public:
         m_endpoint.set_close_handler(bind(&BotWsServer::on_close,this,::_1));
     }
 
-    void on_open(websocketpp::connection_hdl hdl) {
-        m_connections.insert(hdl);
-    }
+    void on_open(websocketpp::connection_hdl hdl);
 
-    void on_close(websocketpp::connection_hdl hdl) {
-        m_connections.erase(hdl);
-    }
+    void on_close(websocketpp::connection_hdl hdl);
 
-    void run() {
-        // Listen on port 9002
-        m_endpoint.listen(std::stoi(getenv("WEBSOCKET_PORT")));
+    void run();
 
-        // Queues a connection accept operation
-        m_endpoint.start_accept();
-
-        // Start the Asio io_service run loop
-        m_endpoint.run();
-    }
+    void sendClientMessage(std::string message);
 
 
+signals:
+    void finished();
 
-    void sendClientMessage(std::string message) {
-        sendMessage(message);
-    }
 private:
     server m_endpoint;
     typedef std::set<websocketpp::connection_hdl,std::owner_less<websocketpp::connection_hdl>> con_list;
@@ -59,9 +52,9 @@ private:
 
     void sendMessage(std::string msg) {
 
-        std::cout << "on_message called with hdl: "
-        << " and message: " << msg
-        << std::endl;
+        qDebug() << "on_message called with hdl: "
+        << " and message: " << msg.c_str()
+        << "\n";
 
         for(auto connection : m_connections) {
             try {
@@ -69,8 +62,8 @@ private:
                 m_endpoint.send(connection, msg, websocketpp::frame::opcode::text);
             } catch (websocketpp::exception const & e) {
 
-                std::cout << "Echo failed because: "
-                << "(" << e.what() << ")" << std::endl;
+                qCritical() << "[Websocket]" << "Echo failed because: "
+                << "(" << e.what() << ")" << "\n";
 
             }
         }
