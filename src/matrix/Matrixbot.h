@@ -9,9 +9,8 @@ public:
     int startMatrix(int argc, char* argv[], BotWsServer& ws);
 
 private:
-    std::vector<std::string> _commands;
-    // We may need to delete rooms on exit.
+    void populateCommands();
+    std::map<std::string, int> _commands;
+    //check: We may need to delete rooms on exit.
     std::vector<Quotient::Room*> _rooms;
-
-
 };

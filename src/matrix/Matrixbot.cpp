@@ -7,14 +7,26 @@
 #include <qt5/QtCore/QCoreApplication>
 #include <qt5/QtCore/QMetaObject>
 
-
 #include <cstdlib>
 #include <iostream>
 #include <string>
 
 #include "../websocket/websocketserver.h"
 
+enum commands {
+    CMD_SEND_WEBSOCKET,
+    CMD_PING
+};
+
+void MatrixBot::populateCommands() {
+    qDebug() << "[Matrix] Populated Commands!";
+    _commands.insert({"/send_websocket", CMD_SEND_WEBSOCKET});
+    _commands.insert({"/ping", CMD_PING});
+}
+
 int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {
+
+    populateCommands();
 
     QCoreApplication app(argc, argv);
     const QString userMxid = getenv("MATRIX_USERNAME");
@@ -25,8 +37,6 @@ int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {
     using Quotient::Room;
 
     auto* c = new Connection(&app);
-
-
 
     c->loginWithPassword(userMxid, password, deviceName);
     app.connect(c, &Connection::connected, c, [c] {
@@ -68,14 +78,28 @@ int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {
                 auto contentJson (timeline[i].get()->contentJson());
                 qInfo() << contentJson;
                 QString cmdValue = contentJson.find("body").value().toString();
-                //todo: replace with hashmap here.
-                if(cmdValue == "/oof") {
-                    auto message (room->postPlainText("sent a websocket message!"));
-                    ws.sendClientMessage("Hello from matrix!");
+
+                MatrixBot::customSplit(cmdValue.toStdString(), ' ');
+
+                auto cmd(_commands.find(cmdValue.toStdString()));
+
+                if(cmd != _commands.end()){
+
+                    qInfo() << "Message was a command. Going to switch statement";
+                    switch(cmd->second){
+                        case CMD_SEND_WEBSOCKET:
+                            room->postPlainText("sent a websocket message!");
+
+                            ws.sendClientMessage("Hello from matrix!");
+                            break;
+                        case CMD_PING:
+                            room->postPlainText("pong!");
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
-
-
         });
 
     });

@@ -29,11 +29,14 @@ public:
         m_endpoint.init_asio();
         m_endpoint.set_open_handler(bind(&BotWsServer::on_open,this,::_1));
         m_endpoint.set_close_handler(bind(&BotWsServer::on_close,this,::_1));
+        m_endpoint.set_message_handler(bind(&BotWsServer::on_message, this, ::_1));
     }
 
     void on_open(websocketpp::connection_hdl hdl);
 
     void on_close(websocketpp::connection_hdl hdl);
+
+    void on_message(websocketpp::connection_hdl hdl);
 
     void run();
 
