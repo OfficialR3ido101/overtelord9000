@@ -21,6 +21,7 @@ void startDiscordBot() {
 int main(int argc, char* argv[]) {
 
     BotWsServer ws;
+    MatrixBot mBot;
 
     if(getenv("DISCORD_TOKEN") == nullptr
         || getenv("WELCOME_CHANNEL") == nullptr
@@ -37,7 +38,7 @@ int main(int argc, char* argv[]) {
 
     qInfo() << "[Main] " << "Press Ctrl+C To exit.";
 
-    startMatrix(argc, argv, ws);
+    mBot.startMatrix(argc, argv, ws);
 
     return 0;
 }
