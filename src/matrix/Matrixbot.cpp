@@ -79,9 +79,18 @@ int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {
                 qInfo() << contentJson;
                 QString cmdValue = contentJson.find("body").value().toString();
 
-                MatrixBot::customSplit(cmdValue.toStdString(), ' ');
+                std::string s = cmdValue.toStdString();
+                std::string delimiter = " ";
+                std::string command = s;
+                size_t position = s.find(delimiter);
+                std::string arguments("");
+                if(position != std::string::npos && position > 0){
+                    command = s.substr(0, position);
+                    arguments = s.substr(position - 1 , s.length());
+                    qDebug() << "Command: " << command.c_str() << " args " << arguments.c_str();
+                }
 
-                auto cmd(_commands.find(cmdValue.toStdString()));
+                auto cmd(_commands.find(command));
 
                 if(cmd != _commands.end()){
 
@@ -89,8 +98,7 @@ int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {
                     switch(cmd->second){
                         case CMD_SEND_WEBSOCKET:
                             room->postPlainText("sent a websocket message!");
-
-                            ws.sendClientMessage("Hello from matrix!");
+                            ws.sendClientMessage(arguments.c_str());
                             break;
                         case CMD_PING:
                             room->postPlainText("pong!");
