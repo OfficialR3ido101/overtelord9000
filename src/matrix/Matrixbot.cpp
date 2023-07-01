@@ -86,7 +86,7 @@ int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {
                 std::string arguments("");
                 if(position != std::string::npos && position > 0){
                     command = s.substr(0, position);
-                    arguments = s.substr(position - 1 , s.length());
+                    arguments = s.substr(position + 1 , s.length());
                     qDebug() << "Command: " << command.c_str() << " args " << arguments.c_str();
                 }
 
