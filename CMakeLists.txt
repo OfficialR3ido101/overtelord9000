@@ -19,7 +19,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fconcepts" )
 add_executable(overtelord9000
 src/main.cpp
 src/websocket/websocketserver.cpp
-src/discord/Discordbot.cpp src/matrix/Matrixbot.cpp
+src/discord/Discordbot.cpp
+src/matrix/Matrixbot.cpp
+src/utils.cpp
 )
 
 install(TARGETS overtelord9000 RUNTIME DESTINATION bin)

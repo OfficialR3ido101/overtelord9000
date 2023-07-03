@@ -3,11 +3,13 @@
 #include <dpp/channel.h>
 #include <cstdlib>
 #include "../websocket/websocketserver.h"
+#include "../utils.h"
 #include <iomanip>
 #include <dpp/dpp.h>
 #include <fmt/format.h>
 #include <qt5/QtCore/QCoreApplication>
 #include <QDebug>
+class BotUtils;
 
 void startDiscord() {
 
@@ -76,10 +78,10 @@ void startDiscord() {
 
         bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
-        dpp::slashcommand sendOverte("overtemessage","send message to webhook.", bot.me.id);
+        dpp::slashcommand sendOverte("allowlist","send message to webhook to allow a user to connect to server.", bot.me.id);
 
         sendOverte.add_option(
-            dpp::command_option(dpp::co_string, "message", "message to be sent", true)
+            dpp::command_option(dpp::co_string, "user", "the user to be allowlisted to overte server.", true)
         );
 
         bot.global_command_create(sendOverte);
@@ -90,10 +92,11 @@ void startDiscord() {
 
     bot.on_slashcommand([&bot, &ws](const dpp::slashcommand_t & event) {
         if(event.command.get_command_name() == "overtemessage") {
-            std::string message = std::get<std::string>(event.get_parameter("message"));
+            std::string username = std::get<std::string>(event.get_parameter("user"));
+            BotUtils bu;
 
-            ws.sendClientMessage(message);
-            event.reply(std::string("sent message: " + message));
+            bu.addOvertePlayer(username, false, false, false ,false, false, false, false, false, false, false);
+
         }
     });
 
