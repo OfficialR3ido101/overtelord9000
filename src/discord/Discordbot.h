@@ -1,3 +1,5 @@
 #pragma once
 
-void startDiscord();
+#include "../websocket/websocketserver.h"
+
+void startDiscord(BotWsServer &ws);

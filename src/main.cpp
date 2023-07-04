@@ -14,8 +14,8 @@ void socketServer(BotWsServer *ws) {
     ws->run();
 }
 
-void startDiscordBot() {
-    startDiscord();
+void startDiscordBot(BotWsServer *ws) {
+    startDiscord(*ws);
 }
 
 int main(int argc, char* argv[]) {
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     std::thread websocket (socketServer, &ws);
-    std::thread discord (startDiscordBot);
+    std::thread discord (startDiscordBot, &ws);
 
     qInfo() << "[Main] " << "Press Ctrl+C To exit.";
 
