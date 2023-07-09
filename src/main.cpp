@@ -43,14 +43,14 @@ int main(int argc, char* argv[]) {
     if(expected_argument == "all") {
 
         if(getenv("DISCORD_TOKEN") == nullptr
-        || getenv("WELCOME_CHANNEL") == nullptr
-        || getenv("MATRIX_USERNAME") == nullptr
-        || getenv("MATRIX_PASSWORD") == nullptr
-        || getenv("MATRIX_PREFIX") == nullptr)
-    {
-        std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN, WELCOME_CHANNEL, MATRIX_USERNAME, MATRIX_PASSWORD and MATRIX_PREFIX" << "\n" << "\n";
-        return 1;
-    }
+            || getenv("WELCOME_CHANNEL") == nullptr
+            || getenv("MATRIX_USERNAME") == nullptr
+            || getenv("MATRIX_PASSWORD") == nullptr
+            || getenv("MATRIX_PREFIX") == nullptr)
+        {
+            std::cout << "Enviroment variables are not set please check to see if you have set DISCORD_TOKEN, WELCOME_CHANNEL, MATRIX_USERNAME, MATRIX_PASSWORD and MATRIX_PREFIX" << "\n" << "\n";
+            return 1;
+        }
         std::thread discord (startDiscordBot, &ws);
 
         qInfo() << "[Main] " << "Press Ctrl+C To exit.";
@@ -59,12 +59,12 @@ int main(int argc, char* argv[]) {
     } else if (expected_argument == "matrix") {
 
         if(getenv("MATRIX_USERNAME") == nullptr
-        || getenv("MATRIX_PASSWORD") == nullptr
-        || getenv("MATRIX_PREFIX") == nullptr){
+            || getenv("MATRIX_PASSWORD") == nullptr
+            || getenv("MATRIX_PREFIX") == nullptr){
             std::cout << "Enviroment variables are not set please check to see if you have set MATRIX_USERNAME, MATRIX_PASSWORD and MATRIX_PREFIX" << "\n" << "\n";
-        }
+            }
 
-        qInfo() << "[Main] " << "Press Ctrl+C To exit.";
+            qInfo() << "[Main] " << "Press Ctrl+C To exit.";
 
         mBot.startMatrix(argc, argv, ws);
     } else if(argc != 1 || expected_argument != "all" || "matrix"){
