@@ -15,6 +15,7 @@
 
 enum commands {
     CMD_SEND_WEBSOCKET,
+    CMD_BAN_USER,
     CMD_PING
 };
 
@@ -22,6 +23,7 @@ void MatrixBot::populateCommands() {
     qDebug() << "[Matrix] Populated Commands!";
     _commands.insert({"/send_websocket", CMD_SEND_WEBSOCKET});
     _commands.insert({"/ping", CMD_PING});
+    _commands.insert({"/ban", CMD_BAN_USER});
 }
 
 int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {

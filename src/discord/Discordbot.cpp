@@ -16,7 +16,7 @@ void startDiscord(BotWsServer &ws) {
 
     dpp::cluster bot(getenv("DISCORD_TOKEN"), dpp::i_default_intents | dpp::i_guild_members);
 
-    const std::string log_name = "overtelord9000.log";
+    BotUtils bu;
 
     bot.on_log([&bot](const dpp::log_t & event) {
         switch (event.severity) {
@@ -71,43 +71,42 @@ void startDiscord(BotWsServer &ws) {
     });
 
     bot.on_ready([&bot](const dpp::ready_t & event) {
+        if(dpp::run_once<struct register_bot_commands>()){
+            dpp::slashcommand sendOverte("allowlist","send message to webhook to allow a user to connect to server.", bot.me.id);
+            dpp::slashcommand banOverteUser("overte_ban","Ban a user in your Overte domain.", bot.me.id);
+
+            sendOverte.add_option(
+                dpp::command_option(dpp::co_string, "user", "the user to be allowlisted to overte server.", true)
+            );
+
+            banOverteUser.add_option(
+                dpp::command_option(dpp::co_string, "user", "User needed to be banned.", true)
+            );
+
+            bot.global_command_create(sendOverte);
+            bot.global_command_create(banOverteUser);
+            qDebug() << "Commands are registered!";
+        }
         qDebug() << "We are online as: " << bot.me.username.c_str();
 
         bot.set_presence(dpp::presence(dpp::ps_dnd, dpp::at_watching, "All the OwO!"));
 
-        dpp::slashcommand sendOverte("allowlist","send message to webhook to allow a user to connect to server.", bot.me.id);
-        dpp::slashcommand banOverteUser("overte_ban","Ban a user in your Overte domain.", bot.me.id);
-
-        sendOverte.add_option(
-            dpp::command_option(dpp::co_string, "user", "the user to be allowlisted to overte server.", true)
-        );
-
-        banOverteUser.add_option(
-            dpp::command_option(dpp::co_string, "user", "User needed to be banned.", true)
-        );
-
-        bot.global_command_create(sendOverte);
-
-        qDebug() << "Commands are registered!";
-
     });
 
-    bot.on_slashcommand([&bot, &ws](const dpp::slashcommand_t & event) {
+    bot.on_slashcommand([&bot, &ws, &bu](const dpp::slashcommand_t & event) {
 
         if(event.command.get_command_name() == "allowlist") {
             std::string username = std::get<std::string>(event.get_parameter("user"));
-            BotUtils bu;
 
-            bu.addOvertePlayer(username, false, false, false ,false, false, false, false, false, false, false, ws);
+            bu.addOvertePlayer("discord", username, false, false, false ,false, false, false, false, false, false, false, ws);
             //ws.sendClientMessage("Hello");
             event.reply("Added!" + username);
 
         }
         if(event.command.get_command_name() == "overte_ban") {
             std::string username = std::get<std::string>(event.get_parameter("user"));
-            BotUtils bu;
 
-            bu.addOvertePlayer(username, false, false, false ,false, false, false, false, false, false, false, ws);
+            bu.addOvertePlayer("discord", username, false, false, false ,false, false, false, false, false, false, false, ws);
             //ws.sendClientMessage("Hello");
             event.reply("Added!" + username);
 
