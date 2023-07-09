@@ -38,15 +38,63 @@ void BotUtils::addOvertePlayer(std::string revPlatform, std::string username, bo
     ws.sendClientMessage(strJson.toStdString());
 }
 
-void BotUtils::banOvertePlayer(std::string username,BotWsServer &ws) {
+void BotUtils::removeOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws) {
 
     QJsonObject jsonObj;
     QJsonObject dataObj {
         {"username", username.c_str()},
     };
 
+    jsonObj["event"] = "remove_user";
+    jsonObj["data"] = dataObj;
+
+    QJsonDocument doc(jsonObj);
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    ws.sendClientMessage(strJson.toStdString());
+}
+
+void BotUtils::banOvertePlayer(std::string revPlatform, std::string username,BotWsServer &ws) {
+
+    QJsonObject jsonObj;
+    QJsonObject dataObj {
+        {"username", username.c_str()},
+    };
+
+    jsonObj["platform"] = revPlatform.c_str();
     jsonObj["event"] = "ban_user";
     jsonObj["data"] = dataObj;
+
+    QJsonDocument doc(jsonObj);
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    ws.sendClientMessage(strJson.toStdString());
+}
+
+void BotUtils::kickOvertePlayer(std::string revPlatform, std::string username,BotWsServer &ws) {
+
+    QJsonObject jsonObj;
+    QJsonObject dataObj {
+        {"username", username.c_str()},
+    };
+
+    jsonObj["platform"] = revPlatform.c_str();
+    jsonObj["event"] = "kick_user";
+    jsonObj["data"] = dataObj;
+
+    QJsonDocument doc(jsonObj);
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    ws.sendClientMessage(strJson.toStdString());
+}
+
+void BotUtils::restartDomainServer(std::string revPlatform, BotWsServer &ws) {
+
+    QJsonObject jsonObj;
+
+    jsonObj["platform"] = revPlatform.c_str();
+    jsonObj["event"] = "restart_server";
+    jsonObj["data"] = {};
 
     QJsonDocument doc(jsonObj);
     QString strJson(doc.toJson(QJsonDocument::Compact));

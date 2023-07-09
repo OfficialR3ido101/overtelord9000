@@ -17,13 +17,11 @@ public:
                          bool can_rez_tmp,
                          bool can_write_to_asset_server,
                          BotWsServer &ws);
-    void banOvertePlayer(std::string username, BotWsServer &ws);
-
+    void removeOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws);
+    void banOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws);
+    void kickOvertePlayer(std::string revPlatform, std::string username,BotWsServer &ws);
+    void restartDomainServer(std::string revPlatform, BotWsServer &ws);
 
 private:
-    void parseJson(QJsonObject json) {
-
-    }
-
 
 };
