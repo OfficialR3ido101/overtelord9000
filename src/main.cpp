@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     MatrixBot mBot;
 
     if(getenv("WEBSOCKET_PORT") == nullptr) {
-        std::cout << "You need to tell me what port to run on. please set WEBSOCKET_PORT enviroment variable!";
+        std::cout << "You need to tell me what port to run on. please set WEBSOCKET_PORT enviroment variable!" << "\n";
         return -1;
     }
 
@@ -67,6 +67,10 @@ int main(int argc, char* argv[]) {
             qInfo() << "[Main] " << "Press Ctrl+C To exit.";
 
         mBot.startMatrix(argc, argv, ws);
+    } else if (expected_argument == "irc") {
+
+
+
     } else if(argc != 1 || expected_argument != "all" || "matrix"){
         std::cout << "You need to tell me what to run by doing all or matrix"
         << "\n" << "The Websocket server will always be started!" << "\n" << "\n";

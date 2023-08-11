@@ -25,7 +25,7 @@ src/utils.cpp
 )
 
 install(TARGETS overtelord9000 RUNTIME DESTINATION bin)
-include_directories("/opt/vcpkg/installed/x64-linux/include/")
+include_directories("/home/r3ido101/tools/vcpkg/installed/x64-linux/include")
 find_package(dpp CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Opus CONFIG REQUIRED)

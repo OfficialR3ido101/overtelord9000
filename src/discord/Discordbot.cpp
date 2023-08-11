@@ -72,10 +72,11 @@ void startDiscord(BotWsServer &ws) {
 
     bot.on_ready([&bot](const dpp::ready_t & event) {
         if(dpp::run_once<struct register_bot_commands>()){
-            dpp::slashcommand sendOverte("allowlist","send message to webhook to allow a user to connect to server.", bot.me.id);
+            dpp::slashcommand allowOverteAccess("allowlist","send message to webhook to allow a user to connect to server.", bot.me.id);
             dpp::slashcommand banOverteUser("overte_ban","Ban a user in your Overte domain.", bot.me.id);
+            dpp::slashcommand modifyOverteUser("modify_user", "Use this to set user permissions if no user is already whitelisted nothing will happen.", bot.me.id);
 
-            sendOverte.add_option(
+            allowOverteAccess.add_option(
                 dpp::command_option(dpp::co_string, "user", "the user to be allowlisted to overte server.", true)
             );
 
@@ -83,7 +84,11 @@ void startDiscord(BotWsServer &ws) {
                 dpp::command_option(dpp::co_string, "user", "User needed to be banned.", true)
             );
 
-            bot.global_command_create(sendOverte);
+            modifyOverteUser.add_option(
+                dpp::command_option("dpp::co_string")
+            )
+
+            bot.global_command_create(allowOverteAccess);
             bot.global_command_create(banOverteUser);
             qDebug() << "Commands are registered!";
         }
