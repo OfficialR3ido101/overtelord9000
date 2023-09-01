@@ -137,3 +137,48 @@ void BotUtils::restartDomainServer(std::string revPlatform, BotWsServer &ws) {
 
     ws.sendClientMessage(strJson.toStdString());
 }
+
+void BotUtils::checkConfigFile() {
+    std::ifstream config("Config.json");
+    if (!config.good() | !config.exists() | !config.valid()) {
+        std::ofstream newConfig("Config.json");
+
+        newConfig << "{
+    \"websocket_port\": 1337,
+    \"discord\": {
+        \"token\": \"\",
+        \"welcome_channel\": \"\",
+        \"preifx\": \"\"
+    },
+    \"matrix\": {
+        \"username\": \"\",
+        \"password\": \"\",
+        \"preifx\": \"\"
+    },
+    \"commands\": {}
+}";
+        newConfig.close();
+        std::cout << "Please fill out the config.json file and restart the bot." << std::endl;
+        exit(0);
+    }
+}
+
+
+void BotUtils::registerCommandsFromConfigFile(){
+    
+    std::filesystem::path currentDirectory = std::filesystem::current_path();
+    std::ifstream config(currentDirectory + "/Config.json");
+    if (!config.good() | !config.exists()) {
+        std::cout << "Config file not found." << std::endl;
+        exit(0);
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(config.readAll());
+    QJsonObject obj = doc.object();
+
+    QJsonObject commandsObj = obj["commands"].toObject();
+
+    for (auto cmd = commandsObj.begin(); cmd != commandsObj.end(); ++cmd) {
+        //TODO: register commands here for all bots
+    }
+}

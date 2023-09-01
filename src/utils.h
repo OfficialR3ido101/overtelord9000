@@ -1,8 +1,7 @@
+
 #pragma once
 
-#include <qjsonobject.h>
-#include "websocket/websocketserver.h"
-
+#include <string>
 
 class BotUtils {
 public:
@@ -32,6 +31,8 @@ public:
     void banOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws);
     void kickOvertePlayer(std::string revPlatform, std::string username,BotWsServer &ws);
     void restartDomainServer(std::string revPlatform, BotWsServer &ws);
+    void checkConfigFile();
+    void registerCommandsFromConfigFile();
 
 private:
 
