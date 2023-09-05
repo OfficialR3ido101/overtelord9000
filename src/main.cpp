@@ -9,6 +9,7 @@
 #include <Quotient/qt_connection_util.h>
 #include <qt5/QtCore/QCoreApplication>
 #include <qt5/QtCore/QMetaObject>
+#include "utilities/utils.h"
 
 void socketServer(BotWsServer *ws) {
     ws->run();
@@ -20,14 +21,12 @@ void startDiscordBot(BotWsServer *ws) {
 
 int main(int argc, char* argv[]) {
 
-    if(argc != 2 || argv == nullptr){
-        std::cout << "You need to tell me what to run by doing all or matrix"
-        << "\n" << "The Websocket server will always be started!" << "\n" << "\n";
-        return -1;
-    }
-
     BotWsServer ws;
     MatrixBot mBot;
+    BotUtils utils;
+
+    // does check to see if config file exists and is valid.
+    utils.checkConfigFile();
 
     if(getenv("WEBSOCKET_PORT") == nullptr) {
         std::cout << "You need to tell me what port to run on. please set WEBSOCKET_PORT enviroment variable!" << "\n";

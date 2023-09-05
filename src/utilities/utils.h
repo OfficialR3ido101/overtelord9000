@@ -31,8 +31,9 @@ public:
     void banOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws);
     void kickOvertePlayer(std::string revPlatform, std::string username,BotWsServer &ws);
     void restartDomainServer(std::string revPlatform, BotWsServer &ws);
-    void checkConfigFile();
+    void UserWizard();
     void registerCommandsFromConfigFile();
+    void checkConfigFile();
 
 private:
 
