@@ -13,26 +13,21 @@
 
 #include "../websocket/websocketserver.h"
 
-enum commands {
-    CMD_SEND_WEBSOCKET,
-    CMD_BAN_USER,
-    CMD_PING
-};
 
-void MatrixBot::populateCommands() {
-    qDebug() << "[Matrix] Populated Commands!";
-    _commands.insert({"/send_websocket", CMD_SEND_WEBSOCKET});
-    _commands.insert({"/ping", CMD_PING});
-    _commands.insert({"/ban", CMD_BAN_USER});
-}
 
 int MatrixBot::startMatrix(int argc, char* argv[], BotWsServer& ws) {
 
-    populateCommands();
+    QFile file("Config.json");
+    QJsonDocument doc;
+    QJsonObject obj;
+    if(file.open(QIODevice::ReadOnly)) {
+        doc = QJsonDocument::fromJson(file.readAll());
+        obj = doc.object();
+    }
 
     QCoreApplication app(argc, argv);
-    const QString userMxid = getenv("MATRIX_USERNAME");
-    const QString password = getenv("MATRIX_PASSWORD");
+    const QString userMxid = getenv(obj["matrix"]["username"].toString().toStdString());
+    const QString password = getenv(obj["matrix"]["password"].toString().toStdString());
     const QString deviceName = "AI";
 
     using Quotient::Connection;

@@ -21,7 +21,9 @@ src/main.cpp
 src/websocket/websocketserver.cpp
 src/discord/Discordbot.cpp
 src/matrix/Matrixbot.cpp
-src/utils.cpp
+src/utilities/utils.cpp
+src/utilities/wizard.cpp
+src/utilities/wizard.h
 )
 
 install(TARGETS overtelord9000 RUNTIME DESTINATION bin)

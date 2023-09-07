@@ -3,7 +3,7 @@
 #include <dpp/channel.h>
 #include <cstdlib>
 #include "../websocket/websocketserver.h"
-#include "../utils.h"
+#include "../utilities/utils.h"
 #include <iomanip>
 #include <dpp/dpp.h>
 #include <fmt/format.h>
@@ -12,9 +12,17 @@
 
 void startDiscord(BotWsServer &ws) {
 
-    uint64_t channelid = std::stoull(getenv("WELCOME_CHANNEL"));
+    QFile file("Config.json");
+    QJsonDocument doc;
+    QJsonObject obj;
+    if(file.open(QIODevice::ReadOnly)) {
+        doc = QJsonDocument::fromJson(file.readAll());
+        obj = doc.object();
+    }
 
-    dpp::cluster bot(getenv("DISCORD_TOKEN"), dpp::i_default_intents | dpp::i_guild_members);
+    uint64_t channelid = std::stoull(obj["discord"]["welcome_channel"].toString().toStdString()]);
+
+    dpp::cluster bot(obj["discord"]["token"].toString().toStdString()), dpp::i_default_intents | dpp::i_guild_members);
 
     BotUtils bu;
 
@@ -85,8 +93,8 @@ void startDiscord(BotWsServer &ws) {
             );
 
             modifyOverteUser.add_option(
-                dpp::command_option("dpp::co_string")
-            )
+                dpp::command_option(dpp::co_string, "user", "User to be modified.", true)
+            );
 
             bot.global_command_create(allowOverteAccess);
             bot.global_command_create(banOverteUser);
