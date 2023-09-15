@@ -5,144 +5,6 @@
 
 using namespace std::filesystem;
 
-void BotUtils::addOvertePlayer(std::string revPlatform, std::string username, bool can_adjust_locks,
-                               bool can_connect,
-                               bool can_connect_past_max_capacity,
-                               bool can_get_and_set_private_user_data,
-                               bool can_kick,
-                               bool can_replace_content,
-                               bool can_rez,
-                               bool can_rez_avatar_entities,
-                               bool can_rez_tmp,
-                               bool can_write_to_asset_server,
-                               BotWsServer &ws)
-{
-
-    QJsonObject jsonObj;
-    QJsonObject dataObj{
-        {"username", username.c_str()},
-        {"can_connect", can_connect},
-        {"can_connect_past_max_capacity", can_connect_past_max_capacity},
-        {"can_kick", can_kick},
-        {"can_replace_content", can_replace_content},
-        {"can_rez", can_rez},
-        {"can_rez_avatar_entities", can_rez_avatar_entities},
-        {"can_rez_tmp", can_rez_tmp},
-        {"can_write_to_asset_server", can_write_to_asset_server}};
-
-    jsonObj["platform"] = revPlatform.c_str();
-    jsonObj["data"] = dataObj;
-    jsonObj["event"] = "add_user";
-
-    QJsonDocument doc(jsonObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-
-    ws.sendClientMessage(strJson.toStdString());
-}
-
-void BotUtils::setOvertePlayerPermissions(std::string revPlatform, std::string username, bool can_adjust_locks,
-                                          bool can_connect,
-                                          bool can_connect_past_max_capacity,
-                                          bool can_get_and_set_private_user_data,
-                                          bool can_kick,
-                                          bool can_replace_content,
-                                          bool can_rez,
-                                          bool can_rez_avatar_entities,
-                                          bool can_rez_tmp,
-                                          bool can_write_to_asset_server,
-                                          BotWsServer &ws)
-{
-
-    QJsonObject jsonObj;
-    QJsonObject dataObj{
-        {"username", username.c_str()},
-        {"can_connect", can_connect},
-        {"can_connect_past_max_capacity", can_connect_past_max_capacity},
-        {"can_kick", can_kick},
-        {"can_replace_content", can_replace_content},
-        {"can_rez", can_rez},
-        {"can_rez_avatar_entities", can_rez_avatar_entities},
-        {"can_rez_tmp", can_rez_tmp},
-        {"can_write_to_asset_server", can_write_to_asset_server}};
-
-    jsonObj["platform"] = revPlatform.c_str();
-    jsonObj["data"] = dataObj;
-    jsonObj["event"] = "update_user";
-
-    QJsonDocument doc(jsonObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-
-    ws.sendClientMessage(strJson.toStdString());
-}
-
-void BotUtils::removeOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws)
-{
-
-    QJsonObject jsonObj;
-    QJsonObject dataObj{
-        {"username", username.c_str()},
-    };
-
-    jsonObj["event"] = "remove_user";
-    jsonObj["data"] = dataObj;
-
-    QJsonDocument doc(jsonObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-
-    ws.sendClientMessage(strJson.toStdString());
-}
-
-void BotUtils::banOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws)
-{
-
-    QJsonObject jsonObj;
-    QJsonObject dataObj{
-        {"username", username.c_str()},
-    };
-
-    jsonObj["platform"] = revPlatform.c_str();
-    jsonObj["event"] = "ban_user";
-    jsonObj["data"] = dataObj;
-
-    QJsonDocument doc(jsonObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-
-    ws.sendClientMessage(strJson.toStdString());
-}
-
-void BotUtils::kickOvertePlayer(std::string revPlatform, std::string username, BotWsServer &ws)
-{
-
-    QJsonObject jsonObj;
-    QJsonObject dataObj{
-        {"username", username.c_str()},
-    };
-
-    jsonObj["platform"] = revPlatform.c_str();
-    jsonObj["event"] = "kick_user";
-    jsonObj["data"] = dataObj;
-
-    QJsonDocument doc(jsonObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-
-    ws.sendClientMessage(strJson.toStdString());
-}
-
-void BotUtils::restartDomainServer(std::string revPlatform, BotWsServer &ws)
-{
-
-    QJsonObject jsonObj;
-
-    jsonObj["platform"] = revPlatform.c_str();
-    jsonObj["event"] = "restart_server";
-    jsonObj["data"] = {};
-
-    QJsonDocument doc(jsonObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-
-    ws.sendClientMessage(strJson.toStdString());
-}
-
 void BotUtils::UserWizard()
 {
     QFile config("Config.json");
@@ -164,10 +26,10 @@ void BotUtils::UserWizard()
 
 void BotUtils::registerCommandsFromConfigFile()
 {
-    
+
     std::filesystem::path current_directory = std::filesystem::current_path();
     std::filesystem::path file_path = current_directory / "Config.json";
-    if (std::filesystem::exists( file_path))
+    if (std::filesystem::exists(file_path))
     {
         std::cout << "Config file not found." << std::endl;
         return;
@@ -187,12 +49,21 @@ void BotUtils::registerCommandsFromConfigFile()
 }
 
 // check to see if Config.json exists in root directory
-void BotUtils::checkConfigFile()
+void BotUtils::checkConfigFileAndValidity()
 {
     std::filesystem::path current_directory = std::filesystem::current_path();
     std::filesystem::path file_path = current_directory / "Config.json";
     QFile config(file_path.c_str());
-    if (config.exists())
+    if (config.exists() && !config.nullptr)
+    {
+        qInfo() << "Config file found!";
+        return;
+    }
+    else
+    {
+        qInfo() << "Config file not found!";
+        return;
+    }
     {
         std::cout << "Config file found." << std::endl;
         continue;
@@ -200,6 +71,44 @@ void BotUtils::checkConfigFile()
     else if (!config.exists())
     {
         std::cout << "Config file not found." << std::endl;
+        return;
+    }
+
+    // Check if all of the values are not null or nullptr
+    bool all_values_not_null = true;
+    if (obj["websocket_port"].isnull() ||
+        obj["discord"]["token"].isnull() ||
+        obj["discord"]["welcome_channel"].isnull() ||
+        obj["matrix"]["username"].ismull() ||
+        obj["matrix"]["password"].isnull() ||
+        obj["matrix"]["prefix"].isnull() ||
+        obj["commands"].isnull())
+    {
+        all_values_not_null = false;
+    }
+
+    // Check if the welcome channel is equal to an UNASSIGNED ULONG
+    bool welcome_channel_is_string = config["discord"]["welcome_channel"].isstring().toulonglong();
+    
+    if (all_values_not_null)
+    {
+        std::cout << "All values are not null or nullptr." << std::endl;
+        continue;
+    }
+    else
+    {
+        std::cout << "One or more values are null or nullptr." << std::endl;
+        return;
+    }
+
+    if (welcome_channel_is_string)
+    {
+        std::cout << "The welcome channel is equal to an UNASSIGNED ULONG." << std::endl;
+        continue;
+    }
+    else
+    {
+        std::cout << "The welcome channel is not equal to an UNASSIGNED ULONG." << std::endl;
         return;
     }
 }
